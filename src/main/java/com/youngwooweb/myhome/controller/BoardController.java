@@ -2,7 +2,9 @@ package com.youngwooweb.myhome.controller;
 
 
 import com.youngwooweb.myhome.model.Board;
+import com.youngwooweb.myhome.model.User;
 import com.youngwooweb.myhome.repository.BoardRepository;
+import com.youngwooweb.myhome.repository.UserRepository;
 import com.youngwooweb.myhome.service.BoardService;
 import com.youngwooweb.myhome.validator.BoardValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ public class BoardController {
     private BoardValidator boardValidator;
 
     @GetMapping("/list")
-    public String list(Model model, @PageableDefault(size = 2) Pageable pageable,
+    public String list(Model model, @PageableDefault(size = 10) Pageable pageable,
                        @RequestParam(required = false, defaultValue = "") String searchText) {
 //        Page<Board> boards = boardRepository.findAll(pageable);
         Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(searchText, searchText, pageable);
@@ -42,6 +44,17 @@ public class BoardController {
         model.addAttribute("endPage", endPage);
         model.addAttribute("boards", boards);
         return "board/list";
+    }
+
+    @GetMapping("/view")
+    public String view(Model model, @RequestParam(required = false) Long id) {
+        if (id == null) {
+            return "redirect:/board/list";
+        } else {
+            Board board = boardRepository.findById(id).orElse(null);
+            model.addAttribute("board", board);
+        }
+        return "board/view";
     }
 
     @GetMapping("/form")
@@ -66,4 +79,5 @@ public class BoardController {
 //        boardRepository.save(board);
         return "redirect:/board/list";
     }
+
 }
